@@ -31,6 +31,23 @@ terraform {
 # For production, we want to specify bigger instance classes and storage, so we specify override parameters here. These
 # inputs get merged with the common inputs from the root and the envcommon terragrunt.hcl
 inputs = {
+  # TODO: To avoid storing your DB password in the code, set it as the environment variable TF_VAR_master_password
+
+  # From envcommon
+  name              = "mysql_${local.env}"
+  instance_class    = "db.t2.micro"
+  allocated_storage = 20
+  storage_type      = "standard"
+  master_username   = "admin"
+
+  # Per stack
   instance_class    = "db.t2.medium"
   allocated_storage = 100
 }
+
+locals {
+  # Automatically load environment-level variables
+  environment_vars = read_terragrunt_config(find_in_parent_folders("env.hcl"))
+
+  # Extract out common variables for reuse
+  env = local.environment_vars.locals.environment
